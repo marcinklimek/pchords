@@ -8,14 +8,13 @@ from utils import notes_names_to_index, midi_to_index
 
 chords_to_pass = list(range(0, 18, 1))
 
-
 # Open all available inputs.
 ports = [mido.open_input(name) for name in mido.get_input_names()]
 
 current_played_notes = []
 
-def play_and_check(notes):
 
+def play_and_check(notes):
     notes_to_check = notes_names_to_index(notes)
 
     try:
@@ -41,7 +40,6 @@ def play_and_check(notes):
 
 
 def generate_chords(quality, scale):
-
     while len(chords_to_pass) > 0:
         index = random.choice(chords_to_pass)
         chords_to_pass.remove(index)
@@ -51,12 +49,12 @@ def generate_chords(quality, scale):
         print(chord_base)
         notes = chord_base.components()
 
-        print("Od tercji")
+        print("From 3rd")
         notes_from_3rd = notes[1:]
         print(notes_from_3rd)
         play_and_check(notes_from_3rd)
 
-        print("Od septymy")
+        print("From seventh")
         notes_from_7th = notes[3:] + notes[1:3]
         print(notes_from_7th)
         notes_names_to_index(notes_from_7th)
@@ -67,9 +65,5 @@ def generate_chords(quality, scale):
 
 
 if __name__ == '__main__':
-
-    quality = 'm9'
-    scale = 'min'
-
-    generate_chords()
-
+    generate_chords(quality='M9', scale='maj')
+    generate_chords(quality='m9', scale='min')

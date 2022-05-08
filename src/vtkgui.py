@@ -2,16 +2,12 @@
 
 import tkinter
 import time
-import math
 import threading
-import json
 import logging
-import asyncio
 from pychord import Chord
 import random
 import mido
 from mido.ports import multi_receive
-from pychord.constants import SCALE_VAL_DICT
 
 from constans import SCALES_LIST
 from utils import notes_names_to_index, midi_to_index, index_to_note_name
@@ -191,13 +187,6 @@ class UI:
 
             self.canvas.itemconfig(self.time_text, text=self.time_current)
 
-        if len(state.played_notes):
-            val = index_to_note_name(state.played_notes, self.chord_scale)
-        else:
-            val = ""
-
-        self.canvas.itemconfig(self.played_text, text=val)
-
         self.root.after(200, self.tick)
 
     def update(self):
@@ -207,6 +196,12 @@ class UI:
             if self.notes_to_check == state.played_notes:
                 self.next_chord()
                 self.update_texts()
+
+            played_notes = index_to_note_name(state.played_notes, self.chord_scale)
+        else:
+            played_notes = ""
+
+        self.canvas.itemconfig(self.played_text, text=played_notes)
 
         self.root.after(100, self.update)
 

@@ -16,3 +16,5 @@ What I have now:
 
 * [pychord](https://github.com/yuma-m/pychord)
 * [mido](https://github.com/mido/mido)
+* [howto py2app](https://www.metachris.com/2015/11/create-standalone-mac-os-x-applications-with-python-and-py2app/)
+* [pyinstaller](https://pyinstaller.org/)

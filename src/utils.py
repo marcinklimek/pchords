@@ -1,4 +1,6 @@
-from constans import NOTES_IN_OCTAVE, SHARPED_SCALE, FLATTED_SCALE
+from pychord.constants.scales import SHARPED_SCALE, FLATTED_SCALE, SCALE_VAL_DICT
+
+from constans import NOTES_IN_OCTAVE
 
 
 def get_key_by_value(dictOfElements, valueToFind):
@@ -28,6 +30,17 @@ def notes_names_to_index(notes):
         else:
             index = get_key_by_value(FLATTED_SCALE, item)
             conv_notes.append(index)
+
+    return conv_notes
+
+
+def index_to_note_name(notes, scale):
+
+    scale_notes = SCALE_VAL_DICT[scale]
+
+    conv_notes = []
+    for item in notes:
+        conv_notes.append(scale_notes[item])
 
     return conv_notes
 

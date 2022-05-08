@@ -14,7 +14,7 @@ What I have now:
 
 ## Current GUI
 
-![it looks like this](/docs/screen_01.png)
+![it looks like this](https://github.com/marcinklimek/pchords/raw/master/docs/screen_01.jpg?raw=true)
 
 ## Usefull links:
 

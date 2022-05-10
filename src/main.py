@@ -9,9 +9,10 @@ from mido.ports import multi_receive
 
 from generator import Generator
 from utils import notes_names_to_index, midi_to_index, index_to_note_name
+import rtmidi
+import platform
 
 logging.basicConfig(level=logging.INFO)
-
 
 # todo: possible race condition on mutating the state
 class State:
@@ -32,8 +33,13 @@ class MidiThread(threading.Thread):
         self.name = name
         self.played_notes = []
 
+        mio = rtmidi.MidiIn()
+
+        names = mio.get_ports()
+        print(f"midi ports: {names}")
+
         # Open all available inputs.
-        self.ports = [mido.open_input(name) for name in mido.get_input_names()]
+        self.ports = [mido.open_input(name) for name in names]
 
     def run(self):
 
@@ -52,15 +58,28 @@ class MidiThread(threading.Thread):
             time.sleep(0.1)
 
 
+
+
 class UI:
 
-    def __init__(self):
-        self.root = tkinter.Tk()
-        self.root.geometry('998x998')
+    MACOS_DEFAULT_FONT_SIZE = 7
+    DEFAULT_FONT_SIZE = 9
 
-        self.root.resizable(0, 0)
+    def __init__(self):
+        self.root = tkinter.Tk(className="pchords")
+        self.root.focus()
+        self.root.geometry('998x800')
+        self.startFontSize = self.DEFAULT_FONT_SIZE
+
+        if platform.system() == 'Windows':
+            pass
+        elif platform.system() == 'Darwin':
+            # Handle tkinter font size bug on MacOS
+            self.startFontSize = self.MACOS_DEFAULT_FONT_SIZE
+
+        #self.setFontSize(self.startFontSize)
+
         self.root.resizable(False, False)
-        self.root.resizable(width=False, height=False)
 
         self.canvas = tkinter.Canvas(
             self.root,
@@ -116,6 +135,14 @@ class UI:
 
         self.next_chord()
         self.update_texts()
+
+    def setFontSize(self, value):
+        default_font = tkinter.Font.nametofont("TkDefaultFont")
+        default_font.configure(size=value)
+        text_font = tkinter.Font.nametofont("TkTextFont")
+        text_font.configure(size=value)
+        fixed_font = tkinter.Font.nametofont("TkFixedFont")
+        fixed_font.configure(size=value)
 
     def next_chord(self):
 

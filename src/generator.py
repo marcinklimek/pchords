@@ -4,32 +4,38 @@ from pychord import Chord
 
 from constans import SCALES_LIST
 
+import pprint
 
 class Generator:
 
     def __init__(self):
         self.test_list = []
-        self.index = 0
+        self.init_chord_list()
+
+    def init_chord_list(self):
+
+        self.test_list = []
 
         self.generate_chords(quality='M9', scale='maj')
+        self.generate_chords(quality='9', scale='maj')
         self.generate_chords(quality='m9', scale='min')
+
+        pprint.pprint(self.test_list)
 
     def get(self):
-        if self.index < len(self.test_list):
-            val = self.test_list[self.index]
-            self.index += 1
-            return val
+        if len(self.test_list):
+            item = random.choice(self.test_list)
+            self.test_list.remove(item)
 
-        self.index = 0
+            print(f"Num left: {len(self.test_list)}")
+            return item
 
-        self.generate_chords(quality='M9', scale='maj')
-        self.generate_chords(quality='m9', scale='min')
+        self.init_chord_list()
 
-        return self.test_list[self.index]
+        return self.get()
 
     def generate_chords(self, quality, scale):
 
-        self.test_list = []
         chords_to_pass = list(range(0, 18, 1))
 
         while len(chords_to_pass) > 0:

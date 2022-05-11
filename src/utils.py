@@ -1,11 +1,11 @@
+import json
 from pychord.constants.scales import SHARPED_SCALE, FLATTED_SCALE, SCALE_VAL_DICT
-
 from constans import NOTES_IN_OCTAVE
 
 
-def get_key_by_value(dictOfElements, valueToFind):
-    for item in dictOfElements.items():
-        if item[1] == valueToFind:
+def get_key_by_value(elements: dict, value_to_find):
+    for item in elements.items():
+        if item[1] == value_to_find:
             return item[0]
 
     return None
@@ -35,7 +35,6 @@ def notes_names_to_index(notes):
 
 
 def index_to_note_name(notes, scale):
-
     scale_notes = SCALE_VAL_DICT[scale]
 
     conv_notes = []
@@ -51,3 +50,13 @@ def midi_to_index(notes):
         conv_notes.append(midi_to_note(item)[0])
 
     return conv_notes
+
+
+def save_json(file_name, file_content):
+    with open(file_name, 'w', encoding='utf-8') as fj:
+        json.dump(file_content, fj, ensure_ascii=False, indent=4)
+
+
+def load_json(file_name):
+    with open(file_name, 'r', encoding='utf-8') as fj:
+        return json.load(fj)

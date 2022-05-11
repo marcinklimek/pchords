@@ -9,7 +9,7 @@ The initial version was just a console app. Then, I wrote a simple GUI.
 
 What I have now:
 * generation of major, minor and dominant chords (half-diminished and altered soon)
-* the randomly chosen chord has to be played starting from the third or the seventh (major/minor) without unison
+* the randomly chosen chord has to be played starting from the third or the seventh (major/minor) without root
 * played notes (read through midi) are compared with the generated ones 
 
 ## Current GUI

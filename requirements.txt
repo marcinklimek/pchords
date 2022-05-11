@@ -1,0 +1,4 @@
+future>=0.18.2
+mido>=1.2.10
+setuptools>=57.4.0
+pychord>=1.0.0

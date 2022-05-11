@@ -1,10 +1,14 @@
 import random
+from os.path import exists
 
 from pychord import Chord
 
 from constans import SCALES_LIST
 
 import pprint
+
+from utils import load_json, save_json
+
 
 class Generator:
 
@@ -16,9 +20,14 @@ class Generator:
 
         self.test_list = []
 
-        self.generate_chords(quality='M9', scale='maj')
-        self.generate_chords(quality='9', scale='maj')
-        self.generate_chords(quality='m9', scale='min')
+        if exists("chords.json"):
+            self.test_list = load_json("chords.json")
+        else:
+            self.generate_chords(quality='M9', scale='maj')
+            self.generate_chords(quality='9', scale='maj')
+            self.generate_chords(quality='m9', scale='min')
+
+            save_json("chords.json", self.test_list)
 
         pprint.pprint(self.test_list)
 
@@ -26,6 +35,8 @@ class Generator:
         if len(self.test_list):
             item = random.choice(self.test_list)
             self.test_list.remove(item)
+
+            save_json("chords.json", self.test_list)
 
             print(f"Num left: {len(self.test_list)}")
             return item
@@ -39,7 +50,6 @@ class Generator:
         chords_to_pass = list(range(0, 18, 1))
 
         while len(chords_to_pass) > 0:
-
             index = random.choice(chords_to_pass)
             chords_to_pass.remove(index)
 
@@ -47,12 +57,12 @@ class Generator:
 
             notes = chord_base.components()
 
-            #3rd
+            # 3rd
             chord_name = str(chord_base) + " - From 3rd"
             notes_from_3rd = notes[1:]
             self.test_list.append((str(chord_base.root), chord_name, notes_from_3rd))
 
-            #7th
+            # 7th
             chord_name = str(chord_base) + " - From 7th"
             notes_from_7th = notes[3:] + notes[1:3]
             self.test_list.append((str(chord_base.root), chord_name, notes_from_7th))

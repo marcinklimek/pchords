@@ -1,3 +1,9 @@
 src/.idea/*
 src/__pycache__/*
 ./DS_Store
+/src/build/
+/src/dist/
+/src/chords.json
+/src/main.spec
+/.idea/*
+.DS_Store

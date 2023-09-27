@@ -47,22 +47,22 @@ class Generator:
 
     def generate_chords(self, quality, scale):
 
-        chords_to_pass = list(range(0, 18, 1))
+        #chords_to_pass = list(range(0, 18, 1))
 
-        while len(chords_to_pass) > 0:
-            index = random.choice(chords_to_pass)
-            chords_to_pass.remove(index)
+        for index in range(0, len(SCALES_LIST), 1):
+            #index = random.choice(chords_to_pass)
+            #chords_to_pass.remove(index)
 
             chord_base = Chord.from_note_index(1, quality, SCALES_LIST[index] + scale)  # returns I of scale
 
             notes = chord_base.components()
 
             # 3rd
-            chord_name = str(chord_base) + " - From 3rd"
+            chord_name = str(SCALES_LIST[index]) + str(chord_base.quality) + " - From 3rd"
             notes_from_3rd = notes[1:]
             self.test_list.append((str(chord_base.root), chord_name, notes_from_3rd))
 
             # 7th
-            chord_name = str(chord_base) + " - From 7th"
+            chord_name = str(SCALES_LIST[index]) + str(chord_base.quality) + " - From 7th"
             notes_from_7th = notes[3:] + notes[1:3]
             self.test_list.append((str(chord_base.root), chord_name, notes_from_7th))

@@ -4,3 +4,4 @@ setuptools>=57.4.0
 pychord>=1.0.0
 rtmidi
 python-rtmidi
+asyncio-mqtt>=0.11.0

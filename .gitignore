@@ -7,3 +7,6 @@ src/__pycache__/*
 /src/main.spec
 /.idea/*
 .DS_Store
+
+
+notes.md

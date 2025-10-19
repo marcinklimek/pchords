@@ -1,0 +1,17 @@
+{
+    "window_width": 998,
+    "window_height": 800,
+    "window_title": "PChords",
+    "default_font_size": 9,
+    "macos_font_size": 7,
+    "midi_poll_interval": 0.1,
+    "midi_timeout": 5.0,
+    "ui_update_interval": 100,
+    "clock_update_interval": 200,
+    "chords_file": "chords.json",
+    "paper_image": "bin/paper.png",
+    "log_level": "INFO",
+    "log_file": null,
+    "chord_qualities": ["M9", "m9"],
+    "chord_scales": ["maj", "min"]
+}

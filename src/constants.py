@@ -1,5 +1,7 @@
 
-
+"""
+Constants for musical scales and chord qualities.
+"""
 from typing import Tuple, List
 
 SCALES_LIST: Tuple[str, ...] = ('Ab', 'A', 'A#', 'Bb', 'B', 'Cb', 'C', 'C#', 'Db', 'D', 'D#', 'Eb', 'E', 'F', 'F#', 'Gb', 'G', 'G#')

@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   backend:
     build:
@@ -11,7 +9,7 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
     volumes:
-      - ./backend:/app
+      - ./backend:/app/backend
       - ./data:/app/data
     command: uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload
     networks:

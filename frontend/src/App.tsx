@@ -50,19 +50,32 @@ function PracticeScreen() {
         return notes[name] ?? 0
       })
       setExpectedNoteIndices(indices)
+      console.log('🎵 New chord:', chordResponse.chord.name)
+      console.log('📝 Expected notes:', noteNames, '→ indices:', indices)
     }
   }, [chordResponse])
 
   // Check if chord is completed
   useEffect(() => {
     if (playedNotes.length === 0) return
+    if (expectedNoteIndices.length === 0) return
 
-    const playedIndices = playedNotes.map((note) => note % 12)
+    // Convert MIDI notes to indices (0-11) and remove duplicates
+    const playedIndices = Array.from(new Set(playedNotes.map((note) => note % 12)))
+
+    // Sort both arrays for comparison
+    const sortedPlayed = [...playedIndices].sort((a, b) => a - b)
+    const sortedExpected = [...expectedNoteIndices].sort((a, b) => a - b)
+
+    // Check if arrays are equal
     const isCorrect =
-      playedIndices.length === expectedNoteIndices.length &&
-      playedIndices.every((note) => expectedNoteIndices.includes(note))
+      sortedPlayed.length === sortedExpected.length &&
+      sortedPlayed.every((note, index) => note === sortedExpected[index])
+
+    console.log('🎹 Played:', sortedPlayed, 'Expected:', sortedExpected, 'Correct:', isCorrect)
 
     if (isCorrect) {
+      console.log('✅ Chord correct! Auto-advancing in 1 second...')
       // Auto-advance to next chord after a short delay
       setTimeout(() => {
         refetch()

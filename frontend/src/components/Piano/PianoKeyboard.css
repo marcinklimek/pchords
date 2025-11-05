@@ -1,0 +1,89 @@
+.piano-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 2rem;
+  background: linear-gradient(to bottom, #1a1a1a, #2a2a2a);
+  border-radius: 1rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.ReactPiano {
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.ReactPiano__Key {
+  transition: all 0.1s ease;
+}
+
+.ReactPiano__Key--natural {
+  background: linear-gradient(to bottom, #ffffff 0%, #f5f5f5 100%);
+  border: 1px solid #ccc;
+}
+
+.ReactPiano__Key--natural:hover {
+  background: linear-gradient(to bottom, #f0f0f0 0%, #e5e5e5 100%);
+}
+
+.ReactPiano__Key--accidental {
+  background: linear-gradient(to bottom, #3a3a3a 0%, #1a1a1a 100%);
+  border: 1px solid #000;
+}
+
+.ReactPiano__Key--accidental:hover {
+  background: linear-gradient(to bottom, #4a4a4a 0%, #2a2a2a 100%);
+}
+
+.ReactPiano__Key--active {
+  background: linear-gradient(to bottom, #0ea5e9 0%, #0284c7 100%) !important;
+  box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.note-indicator {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #0ea5e9;
+  z-index: 10;
+}
+
+.piano-legend {
+  display: flex;
+  gap: 2rem;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 0.5rem;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #d1d5db;
+  font-size: 0.9rem;
+}
+
+.legend-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.legend-dot.expected {
+  border: 2px solid #0ea5e9;
+  background: transparent;
+}
+
+.legend-dot.correct {
+  background: #10b981;
+}
+
+.legend-dot.incorrect {
+  background: #ef4444;
+}

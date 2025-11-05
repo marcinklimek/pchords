@@ -1,4 +1,4 @@
-mport asyncio
+import asyncio
 import signal
 import sys
 from pathlib import Path
@@ -37,8 +37,9 @@ class PChordsApp:
             self.generator = Generator(self.config)
             self.midi_handler = MidiHandler(self.config, self.state)
             self.ui_handler = UIHandler(self.config, self.state)
-            
+
             # Start handlers
+            await self.generator.start()
             await self.midi_handler.start()
             await self.ui_handler.start()
             

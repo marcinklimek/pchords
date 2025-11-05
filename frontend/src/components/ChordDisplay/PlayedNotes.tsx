@@ -20,10 +20,17 @@ function midiToNoteIndex(midiNote: number): number {
 }
 
 export function PlayedNotes({ playedNotes, expectedNotes }: PlayedNotesProps) {
-  const playedIndices = playedNotes.map(midiToNoteIndex)
+  // Convert to indices and remove duplicates
+  const playedIndices = Array.from(new Set(playedNotes.map(midiToNoteIndex)))
+
+  // Sort both for comparison
+  const sortedPlayed = [...playedIndices].sort((a, b) => a - b)
+  const sortedExpected = [...expectedNotes].sort((a, b) => a - b)
+
+  // Check if correct
   const isCorrect = playedNotes.length > 0 &&
-                    playedIndices.length === expectedNotes.length &&
-                    playedIndices.every(note => expectedNotes.includes(note))
+                    sortedPlayed.length === sortedExpected.length &&
+                    sortedPlayed.every((note, index) => note === sortedExpected[index])
 
   return (
     <div className="p-6 bg-gray-800 rounded-lg">
@@ -40,7 +47,7 @@ export function PlayedNotes({ playedNotes, expectedNotes }: PlayedNotesProps) {
               </span>
             ) : (
               <span className="px-3 py-1 bg-gray-700 text-gray-300 rounded-full text-sm">
-                {playedNotes.length} / {expectedNotes.length}
+                {playedIndices.length} / {expectedNotes.length}
               </span>
             )}
           </div>

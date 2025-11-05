@@ -1,4 +1,4 @@
-mport asyncio
+import asyncio
 import time
 import platform
 import tkinter as tk

@@ -19,14 +19,19 @@ class Generator:
     def __init__(self, config: Config):
         """
         Initialize chord generator.
-        
+
         Args:
             config: Application configuration
         """
         self.config = config
         self.chord_list: List[ChordData] = []
         self._lock = asyncio.Lock()
-        asyncio.create_task(self.init_chord_list())
+
+    async def start(self) -> None:
+        """
+        Start the generator and initialize chord list.
+        """
+        await self.init_chord_list()
 
     async def init_chord_list(self, reboot: bool = False) -> None:
         """

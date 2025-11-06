@@ -74,9 +74,11 @@ export function PianoKeyboard({
     }
 
     // Determine key type for positioning
+    const noteIndex = midiNumber % 12
     const keyType = isBlackKey(midiNumber) ? 'black-key' : 'white-key'
+    const noteName = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'][noteIndex]
 
-    console.log(`🎹 Indicator for MIDI ${midiNumber}: ${indicator} ${colorClass} ${keyType}`)
+    console.log(`🎹 Indicator: MIDI=${midiNumber}, Note=${noteName}, Index=${noteIndex}, Type=${keyType}, State=${colorClass}, Icon=${indicator}`)
 
     return (
       <div className={`note-indicator ${colorClass} ${keyType}`}>

@@ -140,9 +140,9 @@ class ChordGenerator:
                         print(f"✅ Selected new chord: {item.name} (root_note={item.root_note}, notes_midi={item.notes_midi})")
                     else:
                         print("❌ ERROR: Chord list is empty after regeneration!")
-                        # Return fallback
+                        # Return fallback: C Major
                         fallback_notes = [note_to_midi("C", 4), note_to_midi("E", 4), note_to_midi("G", 4)]
-                        fallback_root = min(fallback_notes) - 12
+                        fallback_root = note_to_midi("C", octave=3)  # Root is C, not lowest note
                         return ChordData(
                             root="C",
                             name="C Major",
@@ -161,7 +161,7 @@ class ChordGenerator:
                 print("❌ No chords available, returning fallback")
                 # Fallback: C Major chord
                 fallback_notes = [note_to_midi("C", 4), note_to_midi("E", 4), note_to_midi("G", 4)]
-                fallback_root = min(fallback_notes) - 12  # One octave below lowest chord note
+                fallback_root = note_to_midi("C", octave=3)  # Root is C, not lowest note
                 return ChordData(
                     root="C",
                     name="C Major",
@@ -239,11 +239,11 @@ class ChordGenerator:
                         # Chord from 3rd
                         chord_name = f"{root_note}{chord_base.quality} - From 3rd"
                         notes_subset = notes[1:]
-                        # Calculate MIDI numbers for chord notes (octave 4)
+                        # Calculate MIDI numbers for chord notes (octave 4 - right hand)
                         notes_midi = [note_to_midi(n, octave=4) for n in notes_subset]
-                        # Root note: one octave below lowest chord note
-                        lowest_chord_note = min(notes_midi)
-                        root_midi = lowest_chord_note - 12  # One octave lower
+                        # Root note: the actual root of the chord (left hand, octave 3)
+                        # NOT the lowest note! Root is always the chord's root note.
+                        root_midi = note_to_midi(root_note, octave=3)
                         self.chord_list.append(
                             ChordData(
                                 root=str(chord_base.root),
@@ -261,11 +261,10 @@ class ChordGenerator:
                         # Chord from 7th
                         chord_name = f"{root_note}{chord_base.quality} - From 7th"
                         notes_subset = notes[3:] + notes[1:3]
-                        # Calculate MIDI numbers for chord notes
+                        # Calculate MIDI numbers for chord notes (octave 4 - right hand)
                         notes_midi = [note_to_midi(n, octave=4) for n in notes_subset]
-                        # Root note: one octave below lowest chord note
-                        lowest_chord_note = min(notes_midi)
-                        root_midi = lowest_chord_note - 12
+                        # Root note: the actual root of the chord (left hand, octave 3)
+                        root_midi = note_to_midi(root_note, octave=3)
                         self.chord_list.append(
                             ChordData(
                                 root=str(chord_base.root),
@@ -282,11 +281,10 @@ class ChordGenerator:
                     elif inversion_type == "root":
                         # Root position
                         chord_name = f"{root_note}{chord_base.quality}"
-                        # Calculate MIDI numbers for chord notes
+                        # Calculate MIDI numbers for chord notes (octave 4 - right hand)
                         notes_midi = [note_to_midi(n, octave=4) for n in notes]
-                        # Root note: one octave below lowest chord note
-                        lowest_chord_note = min(notes_midi)
-                        root_midi = lowest_chord_note - 12
+                        # Root note: the actual root of the chord (left hand, octave 3)
+                        root_midi = note_to_midi(root_note, octave=3)
                         self.chord_list.append(
                             ChordData(
                                 root=str(chord_base.root),

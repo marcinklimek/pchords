@@ -65,7 +65,7 @@
 
 /* Black keys - position at top/middle for better visibility */
 .note-indicator.black-key {
-  top: 20%;
+  bottom: 20%;
 }
 
 /* Color classes for indicators */

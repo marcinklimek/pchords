@@ -60,12 +60,14 @@
 
 /* White keys - position at bottom */
 .note-indicator.white-key {
-  bottom: 10px;
+  top: auto !important;
+  bottom: 10px !important;
 }
 
-/* Black keys - position at top/middle for better visibility */
+/* Black keys - position at top for better visibility */
 .note-indicator.black-key {
-  top: 20%;
+  bottom: auto !important;
+  top: 15px !important;
 }
 
 /* Color classes for indicators */

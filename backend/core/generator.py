@@ -117,14 +117,16 @@ class ChordGenerator:
                 await self.save_chords()
                 return item
             else:
-                # Fallback
+                # Fallback: C Major chord
+                fallback_notes = [note_to_midi("C", 4), note_to_midi("E", 4), note_to_midi("G", 4)]
+                fallback_root = min(fallback_notes) - 12  # One octave below lowest chord note
                 return ChordData(
                     root="C",
                     name="C Major",
                     notes=["C", "E", "G"],
                     scale="maj",
-                    root_note=note_to_midi("C", octave=3),  # C3 = 48
-                    notes_midi=[note_to_midi("C", 4), note_to_midi("E", 4), note_to_midi("G", 4)]
+                    root_note=fallback_root,
+                    notes_midi=fallback_notes
                 )
 
     async def get_remaining_count(self) -> int:
@@ -179,9 +181,11 @@ class ChordGenerator:
                         # Chord from 3rd
                         chord_name = f"{root_note}{chord_base.quality} - From 3rd"
                         notes_subset = notes[1:]
-                        # Calculate MIDI numbers
-                        root_midi = note_to_midi(root_note, octave=3)  # Left hand bass
-                        notes_midi = [note_to_midi(n, octave=4) for n in notes_subset]  # Right hand chord
+                        # Calculate MIDI numbers for chord notes (octave 4)
+                        notes_midi = [note_to_midi(n, octave=4) for n in notes_subset]
+                        # Root note: one octave below lowest chord note
+                        lowest_chord_note = min(notes_midi)
+                        root_midi = lowest_chord_note - 12  # One octave lower
                         self.chord_list.append(
                             ChordData(
                                 root=str(chord_base.root),
@@ -199,9 +203,11 @@ class ChordGenerator:
                         # Chord from 7th
                         chord_name = f"{root_note}{chord_base.quality} - From 7th"
                         notes_subset = notes[3:] + notes[1:3]
-                        # Calculate MIDI numbers
-                        root_midi = note_to_midi(root_note, octave=3)
+                        # Calculate MIDI numbers for chord notes
                         notes_midi = [note_to_midi(n, octave=4) for n in notes_subset]
+                        # Root note: one octave below lowest chord note
+                        lowest_chord_note = min(notes_midi)
+                        root_midi = lowest_chord_note - 12
                         self.chord_list.append(
                             ChordData(
                                 root=str(chord_base.root),
@@ -218,9 +224,11 @@ class ChordGenerator:
                     elif inversion_type == "root":
                         # Root position
                         chord_name = f"{root_note}{chord_base.quality}"
-                        # Calculate MIDI numbers
-                        root_midi = note_to_midi(root_note, octave=3)
+                        # Calculate MIDI numbers for chord notes
                         notes_midi = [note_to_midi(n, octave=4) for n in notes]
+                        # Root note: one octave below lowest chord note
+                        lowest_chord_note = min(notes_midi)
+                        root_midi = lowest_chord_note - 12
                         self.chord_list.append(
                             ChordData(
                                 root=str(chord_base.root),

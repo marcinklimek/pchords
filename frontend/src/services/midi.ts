@@ -59,11 +59,20 @@ export class MidiService {
   private handleMidiMessage(event: MIDIMessageEvent): void {
     const [command, note, velocity] = event.data
 
-    console.log('🎹 MIDI event:', { command, note, velocity })
+    // Filter out MIDI System Messages (0xF0-0xFF)
+    // These include: Clock (0xF8=248), Active Sensing (0xFE=254), etc.
+    if (command >= 0xF0) {
+      return // Ignore system messages
+    }
+
+    // Only log note messages
+    const statusByte = command & 0xF0
+    if (statusByte === 0x80 || statusByte === 0x90) {
+      console.log('🎹 MIDI event:', { command, note, velocity })
+    }
 
     // Note on: status byte 0x90-0x9F (144-159), velocity > 0
     // Note off: status byte 0x80-0x8F (128-143) or note on with velocity 0
-    const statusByte = command & 0xF0
 
     if (statusByte === 0x90 && velocity > 0) {
       // Note on

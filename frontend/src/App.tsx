@@ -9,8 +9,10 @@ import { CurrentChord } from './components/ChordDisplay/CurrentChord'
 import { PlayedNotes } from './components/ChordDisplay/PlayedNotes'
 import { PianoKeyboard } from './components/Piano/PianoKeyboard'
 import { MidiStatus } from './components/Piano/MidiStatus'
+import { Settings } from './components/Settings/Settings'
 import { useMidi } from './hooks/useMidi'
 import { useNextChord } from './hooks/useChords'
+import { useSettings } from './hooks/useSettings'
 import { apiClient } from './services/api'
 
 // Create a client
@@ -19,6 +21,9 @@ const queryClient = new QueryClient()
 function PracticeScreen() {
   const { isConnected, devices, playedNotes, initialize } = useMidi()
   const { data: chordResponse, isLoading, refetch } = useNextChord()
+  const { settings, updateSettings } = useSettings()
+
+  const [showSettings, setShowSettings] = useState(false)
 
   const [expectedNoteIndices, setExpectedNoteIndices] = useState<number[]>([])
   const [expectedMidiNotes, setExpectedMidiNotes] = useState<number[]>([])
@@ -81,24 +86,31 @@ function PracticeScreen() {
       sortedPlayed.length === sortedExpected.length &&
       sortedPlayed.every((note, index) => note === sortedExpected[index])
 
-    // Check if root note is played (if required)
-    const rootNoteCorrect = rootNoteMidi === undefined || playedNotes.includes(rootNoteMidi)
+    // Check if root note is played (if root note practice is enabled)
+    const rootNoteCorrect =
+      !settings.rootNotePractice || // Root note not required if disabled
+      rootNoteMidi === undefined || // No root note specified
+      playedNotes.includes(rootNoteMidi) // Root note is played
 
-    // Both chord notes AND root note must be correct
+    // Both chord notes AND root note (if enabled) must be correct
     const isCorrect = chordNotesCorrect && rootNoteCorrect
 
     console.log('🎹 Played:', sortedPlayed, 'Expected:', sortedExpected)
-    console.log('🎹 Root note:', rootNoteMidi, 'Played:', rootNoteCorrect)
+    console.log('🎹 Root note practice:', settings.rootNotePractice)
+    console.log('🎹 Root note:', rootNoteMidi, 'Required:', settings.rootNotePractice, 'Played:', rootNoteCorrect)
     console.log('✅ Correct:', isCorrect)
 
     if (isCorrect) {
-      console.log('✅ Chord + root note correct! Auto-advancing in 1 second...')
+      const message = settings.rootNotePractice
+        ? '✅ Chord + root note correct! Auto-advancing...'
+        : '✅ Chord correct! Auto-advancing...'
+      console.log(message)
       // Auto-advance to next chord after a short delay
       setTimeout(() => {
         refetch()
       }, 1000)
     }
-  }, [playedNotes, expectedNoteIndices, rootNoteMidi, refetch])
+  }, [playedNotes, expectedNoteIndices, rootNoteMidi, settings.rootNotePractice, refetch])
 
   const handleNextChord = () => {
     refetch()
@@ -148,7 +160,7 @@ function PracticeScreen() {
             playedNotes={playedNotes}
             expectedNotes={expectedNoteIndices}
             expectedMidiNotes={expectedMidiNotes}
-            rootNoteMidi={rootNoteMidi}
+            rootNoteMidi={settings.rootNotePractice ? rootNoteMidi : undefined}
           />
         </div>
 
@@ -167,6 +179,13 @@ function PracticeScreen() {
           >
             Regenerate All
           </button>
+
+          <button
+            onClick={() => setShowSettings(true)}
+            className="px-8 py-3 bg-gray-700 hover:bg-gray-600 text-white font-semibold rounded-lg transition-colors shadow-lg"
+          >
+            ⚙️ Settings
+          </button>
         </div>
 
         {/* Instructions */}
@@ -182,6 +201,11 @@ function PracticeScreen() {
           </div>
         )}
       </main>
+
+      {/* Settings Modal */}
+      {showSettings && (
+        <Settings settings={settings} onUpdate={updateSettings} onClose={() => setShowSettings(false)} />
+      )}
     </div>
   )
 }

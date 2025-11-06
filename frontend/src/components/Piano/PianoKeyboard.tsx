@@ -39,6 +39,11 @@ export function PianoKeyboard({
 
   const expectedMidiNumbers = getExpectedMidiNumbers()
 
+  // Debug logging
+  console.log('🎹 Piano - Expected note indices:', expectedNotes)
+  console.log('🎹 Piano - Expected MIDI numbers:', expectedMidiNumbers)
+  console.log('🎹 Piano - Currently played:', playedNotes)
+
   // Custom render function for keys
   const renderNoteLabel = ({ midiNumber }: { midiNumber: number }) => {
     const isExpected = expectedMidiNumbers.includes(midiNumber)
@@ -46,11 +51,24 @@ export function PianoKeyboard({
 
     if (!isExpected && !isPlayed) return null
 
+    // Determine state and color
+    let indicator = ''
+    let colorClass = ''
+
+    if (isPlayed && isExpected) {
+      indicator = '✓'
+      colorClass = 'correct'
+    } else if (isPlayed && !isExpected) {
+      indicator = '✗'
+      colorClass = 'incorrect'
+    } else if (!isPlayed && isExpected) {
+      indicator = '○'
+      colorClass = 'expected'
+    }
+
     return (
-      <div className="note-indicator">
-        {isPlayed && isExpected && '✓'}
-        {isPlayed && !isExpected && '✗'}
-        {!isPlayed && isExpected && '○'}
+      <div className={`note-indicator ${colorClass}`}>
+        {indicator}
       </div>
     )
   }
@@ -73,16 +91,16 @@ export function PianoKeyboard({
 
       <div className="piano-legend">
         <div className="legend-item">
-          <span className="legend-dot expected"></span>
-          <span>Expected Note</span>
+          <span className="legend-icon expected">○</span>
+          <span>Expected - Not Played Yet</span>
         </div>
         <div className="legend-item">
-          <span className="legend-dot correct"></span>
-          <span>Correct</span>
+          <span className="legend-icon correct">✓</span>
+          <span>Correct - Playing Right Note</span>
         </div>
         <div className="legend-item">
-          <span className="legend-dot incorrect"></span>
-          <span>Incorrect</span>
+          <span className="legend-icon incorrect">✗</span>
+          <span>Incorrect - Wrong Note</span>
         </div>
       </div>
     </div>

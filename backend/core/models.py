@@ -62,6 +62,10 @@ class ChordData(BaseModel):
     quality: Optional[str] = Field(default=None, description="Chord quality")
     inversion: Optional[str] = Field(default=None, description="Chord inversion type")
 
+    # MIDI data for root note + full chord practice
+    root_note: Optional[int] = Field(default=None, description="MIDI number for root note (left hand bass)")
+    notes_midi: Optional[List[int]] = Field(default=None, description="MIDI numbers for chord notes")
+
 
 class ChordSet(BaseModel):
     """Configuration for a set of chords to practice."""

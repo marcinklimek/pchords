@@ -13,6 +13,37 @@ from ..utils.constants import SCALES_LIST
 from ..utils.converters import save_json, load_json
 
 
+# MIDI note conversion
+NOTE_TO_INDEX = {
+    'C': 0, 'C#': 1, 'Db': 1,
+    'D': 2, 'D#': 3, 'Eb': 3,
+    'E': 4,
+    'F': 5, 'F#': 6, 'Gb': 6,
+    'G': 7, 'G#': 8, 'Ab': 8,
+    'A': 9, 'A#': 10, 'Bb': 10,
+    'B': 11
+}
+
+
+def note_to_midi(note_name: str, octave: int = 4) -> int:
+    """
+    Convert note name to MIDI number.
+
+    Args:
+        note_name: Note name (e.g., 'C', 'C#', 'Db')
+        octave: Octave number (default 4 = middle C)
+
+    Returns:
+        MIDI note number (0-127)
+    """
+    if note_name not in NOTE_TO_INDEX:
+        return 60  # Default to middle C
+
+    # MIDI number = (octave + 1) * 12 + note_index
+    # C4 (middle C) = 60
+    return (octave + 1) * 12 + NOTE_TO_INDEX[note_name]
+
+
 class ChordGenerator:
     """Generates and manages chords for practice."""
 
@@ -52,7 +83,10 @@ class ChordGenerator:
                             root=chord[0],
                             name=chord[1],
                             notes=chord[2],
-                            scale=chord[3] if len(chord) > 3 else ""
+                            scale=chord[3] if len(chord) > 3 else "",
+                            # For backwards compatibility, generate MIDI if not present
+                            root_note=chord.get('root_note') if isinstance(chord, dict) else None,
+                            notes_midi=chord.get('notes_midi') if isinstance(chord, dict) else None
                         )
                         for chord in raw_data
                     ]
@@ -88,7 +122,9 @@ class ChordGenerator:
                     root="C",
                     name="C Major",
                     notes=["C", "E", "G"],
-                    scale="maj"
+                    scale="maj",
+                    root_note=note_to_midi("C", octave=3),  # C3 = 48
+                    notes_midi=[note_to_midi("C", 4), note_to_midi("E", 4), note_to_midi("G", 4)]
                 )
 
     async def get_remaining_count(self) -> int:
@@ -143,6 +179,9 @@ class ChordGenerator:
                         # Chord from 3rd
                         chord_name = f"{root_note}{chord_base.quality} - From 3rd"
                         notes_subset = notes[1:]
+                        # Calculate MIDI numbers
+                        root_midi = note_to_midi(root_note, octave=3)  # Left hand bass
+                        notes_midi = [note_to_midi(n, octave=4) for n in notes_subset]  # Right hand chord
                         self.chord_list.append(
                             ChordData(
                                 root=str(chord_base.root),
@@ -150,7 +189,9 @@ class ChordGenerator:
                                 notes=notes_subset,
                                 scale=scale,
                                 quality=quality,
-                                inversion="from_3rd"
+                                inversion="from_3rd",
+                                root_note=root_midi,
+                                notes_midi=notes_midi
                             )
                         )
 
@@ -158,6 +199,9 @@ class ChordGenerator:
                         # Chord from 7th
                         chord_name = f"{root_note}{chord_base.quality} - From 7th"
                         notes_subset = notes[3:] + notes[1:3]
+                        # Calculate MIDI numbers
+                        root_midi = note_to_midi(root_note, octave=3)
+                        notes_midi = [note_to_midi(n, octave=4) for n in notes_subset]
                         self.chord_list.append(
                             ChordData(
                                 root=str(chord_base.root),
@@ -165,13 +209,18 @@ class ChordGenerator:
                                 notes=notes_subset,
                                 scale=scale,
                                 quality=quality,
-                                inversion="from_7th"
+                                inversion="from_7th",
+                                root_note=root_midi,
+                                notes_midi=notes_midi
                             )
                         )
 
                     elif inversion_type == "root":
                         # Root position
                         chord_name = f"{root_note}{chord_base.quality}"
+                        # Calculate MIDI numbers
+                        root_midi = note_to_midi(root_note, octave=3)
+                        notes_midi = [note_to_midi(n, octave=4) for n in notes]
                         self.chord_list.append(
                             ChordData(
                                 root=str(chord_base.root),
@@ -179,7 +228,9 @@ class ChordGenerator:
                                 notes=notes,
                                 scale=scale,
                                 quality=quality,
-                                inversion="root"
+                                inversion="root",
+                                root_note=root_midi,
+                                notes_midi=notes_midi
                             )
                         )
 
@@ -198,7 +249,9 @@ class ChordGenerator:
                     "notes": chord.notes,
                     "scale": chord.scale,
                     "quality": chord.quality,
-                    "inversion": chord.inversion
+                    "inversion": chord.inversion,
+                    "root_note": chord.root_note,
+                    "notes_midi": chord.notes_midi
                 }
                 for chord in self.chord_list
             ]

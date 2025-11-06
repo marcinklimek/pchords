@@ -71,12 +71,15 @@ class ChordGenerator:
             reboot: Whether to force regeneration of chords
         """
         async with self._lock:
+            print(f"🔄 init_chord_list called (reboot={reboot})")
             self.chord_list = []
 
             # Try to load from file
             if self.chords_file.exists() and not reboot:
+                print(f"📂 Loading chords from {self.chords_file}")
                 try:
                     raw_data = load_json(self.chords_file)
+                    print(f"📥 Loaded {len(raw_data)} chords from file")
                     self.chord_list = [
                         ChordData(**chord) if isinstance(chord, dict)
                         else ChordData(
@@ -90,13 +93,21 @@ class ChordGenerator:
                         )
                         for chord in raw_data
                     ]
-                except Exception:
+                    print(f"✅ Successfully parsed {len(self.chord_list)} chords")
+                except Exception as e:
+                    print(f"❌ Failed to load chords from file: {e}")
                     self.chord_list = []
+            elif reboot:
+                print("🔁 Reboot flag set, will regenerate chords")
+            else:
+                print("📝 Chords file doesn't exist, will generate new chords")
 
             # Generate if needed
             if len(self.chord_list) == 0 or reboot:
+                print(f"🎲 Generating chords (current count: {len(self.chord_list)})")
                 await self.generate_chords()
                 await self.save_chords()
+                print(f"💾 Saved {len(self.chord_list)} chords to file")
 
     async def get_next(self) -> ChordData:
         """
@@ -108,6 +119,7 @@ class ChordGenerator:
         async with self._lock:
             # Regenerate if empty
             if len(self.chord_list) == 0:
+                print("📝 Chord list empty, regenerating...")
                 await self.init_chord_list(reboot=True)
 
             # Get random chord
@@ -117,16 +129,36 @@ class ChordGenerator:
                 # Check if chord has MIDI data (root_note and notes_midi)
                 # If not, it's from old cache - regenerate all chords
                 if item.root_note is None or item.notes_midi is None:
-                    print("⚠️ Old chord format detected, regenerating all chords...")
+                    print(f"⚠️ Old chord format detected (root_note={item.root_note}, notes_midi={item.notes_midi})")
+                    print("📝 Regenerating all chords with new format...")
                     await self.init_chord_list(reboot=True)
+                    print(f"✅ Regeneration complete. New chord list has {len(self.chord_list)} chords")
+
                     # Get new chord after regeneration
                     if len(self.chord_list) > 0:
                         item = random.choice(self.chord_list)
+                        print(f"✅ Selected new chord: {item.name} (root_note={item.root_note}, notes_midi={item.notes_midi})")
+                    else:
+                        print("❌ ERROR: Chord list is empty after regeneration!")
+                        # Return fallback
+                        fallback_notes = [note_to_midi("C", 4), note_to_midi("E", 4), note_to_midi("G", 4)]
+                        fallback_root = min(fallback_notes) - 12
+                        return ChordData(
+                            root="C",
+                            name="C Major",
+                            notes=["C", "E", "G"],
+                            scale="maj",
+                            root_note=fallback_root,
+                            notes_midi=fallback_notes
+                        )
 
+                # Remove from list and save
                 self.chord_list.remove(item)
                 await self.save_chords()
+                print(f"🎵 Returning chord: {item.name}, {len(self.chord_list)} remaining")
                 return item
             else:
+                print("❌ No chords available, returning fallback")
                 # Fallback: C Major chord
                 fallback_notes = [note_to_midi("C", 4), note_to_midi("E", 4), note_to_midi("G", 4)]
                 fallback_root = min(fallback_notes) - 12  # One octave below lowest chord note
@@ -146,13 +178,23 @@ class ChordGenerator:
 
     async def generate_chords(self) -> None:
         """Generate chord data for all enabled chord sets."""
+        print(f"🎼 Generating chords from {len(self.chord_sets)} chord sets...")
+        total_generated = 0
+
         for chord_set in self.chord_sets:
             if not chord_set.enabled:
+                print(f"⏭️ Skipping disabled chord set: {chord_set.name}")
                 continue
+
+            print(f"📝 Processing chord set: {chord_set.name}")
+            before_count = len(self.chord_list)
 
             # Generate from specific chords if provided
             if chord_set.specific_chords:
                 self.chord_list.extend(chord_set.specific_chords)
+                added = len(self.chord_list) - before_count
+                print(f"  ➕ Added {added} specific chords")
+                total_generated += added
                 continue
 
             # Generate from qualities and scales
@@ -161,6 +203,12 @@ class ChordGenerator:
                     await self._generate_chords_for_quality_scale(
                         quality, scale, chord_set
                     )
+
+            added = len(self.chord_list) - before_count
+            print(f"  ➕ Generated {added} chords for this set")
+            total_generated += added
+
+        print(f"✅ Total generated: {total_generated} chords")
 
     async def _generate_chords_for_quality_scale(
         self, quality: str, scale: str, chord_set: ChordSet
@@ -253,7 +301,8 @@ class ChordGenerator:
                         )
 
             except Exception as e:
-                # Skip chords that fail to generate
+                # Log error and skip chords that fail to generate
+                print(f"⚠️ Failed to generate {root_note}{quality} ({scale}): {e}")
                 continue
 
     async def save_chords(self) -> None:

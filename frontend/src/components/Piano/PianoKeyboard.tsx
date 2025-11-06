@@ -44,6 +44,13 @@ export function PianoKeyboard({
   console.log('🎹 Piano - Expected MIDI numbers:', expectedMidiNumbers)
   console.log('🎹 Piano - Currently played:', playedNotes)
 
+  // Check if a MIDI note is a black key (sharp/flat)
+  const isBlackKey = (midiNumber: number): boolean => {
+    const noteIndex = midiNumber % 12
+    // Black keys: C#(1), D#(3), F#(6), G#(8), A#(10)
+    return [1, 3, 6, 8, 10].includes(noteIndex)
+  }
+
   // Custom render function for keys
   const renderNoteLabel = ({ midiNumber }: { midiNumber: number }) => {
     const isExpected = expectedMidiNumbers.includes(midiNumber)
@@ -66,8 +73,13 @@ export function PianoKeyboard({
       colorClass = 'expected'
     }
 
+    // Determine key type for positioning
+    const keyType = isBlackKey(midiNumber) ? 'black-key' : 'white-key'
+
+    console.log(`🎹 Indicator for MIDI ${midiNumber}: ${indicator} ${colorClass} ${keyType}`)
+
     return (
-      <div className={`note-indicator ${colorClass}`}>
+      <div className={`note-indicator ${colorClass} ${keyType}`}>
         {indicator}
       </div>
     )

@@ -59,13 +59,13 @@
 }
 
 /* White keys - position at bottom */
-.ReactPiano__Key--natural .ReactPiano__NoteLabelContainer .note-indicator {
+.note-indicator.white-key {
   bottom: 10px;
 }
 
-/* Black keys - position at top/middle */
-.ReactPiano__Key--accidental .ReactPiano__NoteLabelContainer .note-indicator {
-  top: 25%;
+/* Black keys - position at top/middle for better visibility */
+.note-indicator.black-key {
+  top: 20%;
 }
 
 /* Color classes for indicators */

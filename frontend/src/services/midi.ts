@@ -59,13 +59,21 @@ export class MidiService {
   private handleMidiMessage(event: MIDIMessageEvent): void {
     const [command, note, velocity] = event.data
 
-    // Note on: command = 144 (0x90), velocity > 0
-    // Note off: command = 128 (0x80) or command = 144 with velocity = 0
-    if (command === 144 && velocity > 0) {
+    console.log('🎹 MIDI event:', { command, note, velocity })
+
+    // Note on: status byte 0x90-0x9F (144-159), velocity > 0
+    // Note off: status byte 0x80-0x8F (128-143) or note on with velocity 0
+    const statusByte = command & 0xF0
+
+    if (statusByte === 0x90 && velocity > 0) {
+      // Note on
       this.playedNotes.add(note)
+      console.log('✅ Note ON:', note, 'Played notes:', Array.from(this.playedNotes))
       this.onNoteOnCallback?.(note, velocity)
-    } else if (command === 128 || (command === 144 && velocity === 0)) {
+    } else if (statusByte === 0x80 || (statusByte === 0x90 && velocity === 0)) {
+      // Note off
       this.playedNotes.delete(note)
+      console.log('❌ Note OFF:', note, 'Played notes:', Array.from(this.playedNotes))
       this.onNoteOffCallback?.(note, velocity)
     }
   }

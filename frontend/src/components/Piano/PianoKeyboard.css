@@ -69,8 +69,13 @@
 }
 
 /* Color classes for indicators */
+.note-indicator.root {
+  color: #f59e0b;  /* Orange for root note */
+  font-size: 1.8rem;  /* Slightly larger for root */
+}
+
 .note-indicator.expected {
-  color: #3b82f6;  /* Blue for expected */
+  color: #3b82f6;  /* Blue for expected chord notes */
 }
 
 .note-indicator.correct {
@@ -104,6 +109,10 @@
   min-width: 24px;
   text-align: center;
   text-shadow: 0 0 3px rgba(0, 0, 0, 0.8);
+}
+
+.legend-icon.root {
+  color: #f59e0b;  /* Orange */
 }
 
 .legend-icon.expected {

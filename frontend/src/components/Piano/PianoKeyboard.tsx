@@ -9,6 +9,8 @@ import './PianoKeyboard.css'
 interface PianoKeyboardProps {
   playedNotes: number[]
   expectedNotes: number[]
+  expectedMidiNotes?: number[]  // Optional: pre-calculated MIDI notes from backend
+  rootNoteMidi?: number  // Optional: root note for left hand bass
   onPlayNote?: (midiNumber: number) => void
   onStopNote?: (midiNumber: number) => void
 }
@@ -16,6 +18,8 @@ interface PianoKeyboardProps {
 export function PianoKeyboard({
   playedNotes,
   expectedNotes,
+  expectedMidiNotes,
+  rootNoteMidi,
   onPlayNote,
   onStopNote,
 }: PianoKeyboardProps) {
@@ -25,6 +29,14 @@ export function PianoKeyboard({
 
   // Convert note indices to MIDI numbers in the keyboard range
   const getExpectedMidiNumbers = (): number[] => {
+    // Use pre-calculated MIDI notes if available
+    if (expectedMidiNotes && expectedMidiNotes.length > 0) {
+      return expectedMidiNotes.filter(
+        (midi) => midi >= firstNote && midi <= lastNote
+      )
+    }
+
+    // Fallback: convert indices across all octaves
     const midiNumbers: number[] = []
     for (let octave = 3; octave < 6; octave++) {
       expectedNotes.forEach((noteIndex) => {
@@ -37,11 +49,12 @@ export function PianoKeyboard({
     return midiNumbers
   }
 
-  const expectedMidiNumbers = getExpectedMidiNumbers()
+  const expectedChordNotes = getExpectedMidiNumbers()
 
   // Debug logging
   console.log('🎹 Piano - Expected note indices:', expectedNotes)
-  console.log('🎹 Piano - Expected MIDI numbers:', expectedMidiNumbers)
+  console.log('🎹 Piano - Expected chord MIDI:', expectedChordNotes)
+  console.log('🎹 Piano - Root note MIDI:', rootNoteMidi)
   console.log('🎹 Piano - Currently played:', playedNotes)
 
   // Check if a MIDI note is a black key (sharp/flat)
@@ -53,7 +66,9 @@ export function PianoKeyboard({
 
   // Custom render function for keys
   const renderNoteLabel = ({ midiNumber }: { midiNumber: number }) => {
-    const isExpected = expectedMidiNumbers.includes(midiNumber)
+    const isExpectedChordNote = expectedChordNotes.includes(midiNumber)
+    const isRootNote = rootNoteMidi !== undefined && midiNumber === rootNoteMidi
+    const isExpected = isExpectedChordNote || isRootNote
     const isPlayed = playedNotes.includes(midiNumber)
 
     if (!isExpected && !isPlayed) return null
@@ -69,8 +84,9 @@ export function PianoKeyboard({
       indicator = '✗'
       colorClass = 'incorrect'
     } else if (!isPlayed && isExpected) {
-      indicator = '○'
-      colorClass = 'expected'
+      // Different indicator for root note vs chord notes
+      indicator = isRootNote ? '■' : '○'
+      colorClass = isRootNote ? 'root' : 'expected'
     }
 
     // Determine key type for positioning
@@ -101,8 +117,12 @@ export function PianoKeyboard({
 
       <div className="piano-legend">
         <div className="legend-item">
+          <span className="legend-icon root">■</span>
+          <span>Root Note - Left Hand Bass</span>
+        </div>
+        <div className="legend-item">
           <span className="legend-icon expected">○</span>
-          <span>Expected - Not Played Yet</span>
+          <span>Chord Notes - Right Hand</span>
         </div>
         <div className="legend-item">
           <span className="legend-icon correct">✓</span>

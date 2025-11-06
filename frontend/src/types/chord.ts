@@ -9,6 +9,9 @@ export interface ChordData {
   scale: string
   quality?: string
   inversion?: string
+  // MIDI data for root note + full chord practice
+  root_note?: number  // MIDI number for root note (left hand bass)
+  notes_midi?: number[]  // MIDI numbers for chord notes
 }
 
 export interface ChordSet {

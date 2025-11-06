@@ -23,36 +23,43 @@ export function useMidi(): UseMidiReturn {
 
   const updateDevices = useCallback(() => {
     const connectedDevices = midiService.getConnectedDevices()
+    console.log('📱 Devices updated:', connectedDevices)
     setDevices(connectedDevices)
     setIsConnected(midiService.isConnected())
   }, [])
 
-  const updatePlayedNotes = useCallback(() => {
-    const notes = midiService.getPlayedNotes()
-    setPlayedNotes(notes)
-  }, [])
-
   const initialize = useCallback(async () => {
+    console.log('🔌 Initializing MIDI...')
     const success = await midiService.initialize()
 
     if (success) {
+      console.log('✅ MIDI initialized successfully')
       setIsInitialized(true)
       updateDevices()
 
-      // Set up MIDI event listeners
-      midiService.onNoteOn(() => {
-        updatePlayedNotes()
+      // Set up MIDI event listeners - use direct state setters
+      midiService.onNoteOn((note, velocity) => {
+        console.log('🎵 Note ON callback fired:', note, velocity)
+        const notes = midiService.getPlayedNotes()
+        console.log('📝 Updating React state with notes:', notes)
+        setPlayedNotes(notes)
       })
 
-      midiService.onNoteOff(() => {
-        updatePlayedNotes()
+      midiService.onNoteOff((note, velocity) => {
+        console.log('🔇 Note OFF callback fired:', note, velocity)
+        const notes = midiService.getPlayedNotes()
+        console.log('📝 Updating React state with notes:', notes)
+        setPlayedNotes(notes)
       })
 
       midiService.onStateChange(() => {
+        console.log('🔄 MIDI state changed')
         updateDevices()
       })
+    } else {
+      console.error('❌ MIDI initialization failed')
     }
-  }, [updateDevices, updatePlayedNotes])
+  }, [updateDevices])
 
   const disconnect = useCallback(() => {
     midiService.disconnect()

@@ -35,14 +35,21 @@ function PracticeScreen() {
       const chord = chordResponse.chord
       const noteNames = chord.notes
 
+      console.log('🎵 New chord received:', chord.name)
+      console.log('📦 Chord data:', {
+        root: chord.root,
+        notes: chord.notes,
+        root_note: chord.root_note,
+        notes_midi: chord.notes_midi,
+      })
+
       // Use MIDI numbers if available, otherwise convert note names
       if (chord.notes_midi && chord.notes_midi.length > 0) {
         // Use pre-calculated MIDI numbers from backend
         setExpectedMidiNotes(chord.notes_midi)
         const indices = chord.notes_midi.map((midi) => midi % 12)
         setExpectedNoteIndices(indices)
-        console.log('🎵 New chord:', chord.name)
-        console.log('📝 Expected MIDI notes:', chord.notes_midi, '→ indices:', indices)
+        console.log('✅ Using pre-calculated MIDI notes:', chord.notes_midi, '→ indices:', indices)
       } else {
         // Fallback: convert note names to indices (0-11)
         const noteToIndex: { [key: string]: number } = {
@@ -57,14 +64,16 @@ function PracticeScreen() {
         const indices = noteNames.map((name) => noteToIndex[name] ?? 0)
         setExpectedNoteIndices(indices)
         setExpectedMidiNotes([])
-        console.log('🎵 New chord:', chord.name)
+        console.warn('⚠️ No MIDI notes from backend, using fallback conversion')
         console.log('📝 Expected notes:', noteNames, '→ indices:', indices)
       }
 
       // Set root note MIDI number if available
-      setRootNoteMidi(chord.root_note)
-      if (chord.root_note) {
-        console.log('🎹 Root note MIDI:', chord.root_note)
+      setRootNoteMidi(chord.root_note ?? undefined)
+      if (chord.root_note !== null && chord.root_note !== undefined) {
+        console.log('✅ Root note MIDI:', chord.root_note)
+      } else {
+        console.warn('⚠️ No root note in chord data! root_note:', chord.root_note)
       }
     }
   }, [chordResponse])

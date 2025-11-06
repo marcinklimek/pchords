@@ -113,6 +113,16 @@ class ChordGenerator:
             # Get random chord
             if len(self.chord_list) > 0:
                 item = random.choice(self.chord_list)
+
+                # Check if chord has MIDI data (root_note and notes_midi)
+                # If not, it's from old cache - regenerate all chords
+                if item.root_note is None or item.notes_midi is None:
+                    print("⚠️ Old chord format detected, regenerating all chords...")
+                    await self.init_chord_list(reboot=True)
+                    # Get new chord after regeneration
+                    if len(self.chord_list) > 0:
+                        item = random.choice(self.chord_list)
+
                 self.chord_list.remove(item)
                 await self.save_chords()
                 return item

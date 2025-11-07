@@ -21,8 +21,8 @@ export function PianoKeyboard({
   onPlayNote,
   onStopNote,
 }: PianoKeyboardProps) {
-  // Define keyboard range (C3 to C6)
-  const firstNote = MidiNumbers.fromNote('c3')
+  // Define keyboard range (C2 to C6) - C2 for root notes (left hand), C3-C6 for chords (right hand)
+  const firstNote = MidiNumbers.fromNote('c2')
   const lastNote = MidiNumbers.fromNote('c6')
 
   // Convert note indices to MIDI numbers in the keyboard range

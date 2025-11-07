@@ -99,6 +99,34 @@ def midi_to_index(notes: List[int]) -> List[int]:
     return conv_notes
 
 
+def note_name_to_midi(note_name: str, octave: int = 2) -> int:
+    """
+    Convert note name to MIDI note number.
+
+    Args:
+        note_name: Note name (e.g., 'C', 'D#', 'Eb')
+        octave: Octave number (default 2 for left hand bass notes)
+
+    Returns:
+        MIDI note number (e.g., C2 = 36, C3 = 48)
+    """
+    # Get note index from sharped or flatted scale
+    note_index = get_key_by_value(SHARPED_SCALE, note_name)
+    if note_index is None:
+        note_index = get_key_by_value(FLATTED_SCALE, note_name)
+
+    if note_index is None:
+        # Fallback to C if note not found
+        note_index = 0
+
+    # Convert to MIDI number: octave * 12 + note_index + 12 (MIDI offset)
+    # C2 = 2*12 + 0 + 12 = 36
+    # C3 = 3*12 + 0 + 12 = 48
+    midi_number = octave * 12 + note_index + 12
+
+    return midi_number
+
+
 def save_json(file_path: Path, file_content: Any) -> None:
     """
     Save content to JSON file.

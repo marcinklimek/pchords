@@ -9,6 +9,7 @@ import './PianoKeyboard.css'
 interface PianoKeyboardProps {
   playedNotes: number[]
   expectedNotes: number[]
+  expectedRootNotes?: number[]  // MIDI numbers for root notes (left hand)
   onPlayNote?: (midiNumber: number) => void
   onStopNote?: (midiNumber: number) => void
 }
@@ -16,6 +17,7 @@ interface PianoKeyboardProps {
 export function PianoKeyboard({
   playedNotes,
   expectedNotes,
+  expectedRootNotes = [],
   onPlayNote,
   onStopNote,
 }: PianoKeyboardProps) {
@@ -42,6 +44,7 @@ export function PianoKeyboard({
   // Debug logging
   console.log('🎹 Piano - Expected note indices:', expectedNotes)
   console.log('🎹 Piano - Expected MIDI numbers:', expectedMidiNumbers)
+  console.log('🎸 Piano - Expected root notes:', expectedRootNotes)
   console.log('🎹 Piano - Currently played:', playedNotes)
 
   // Check if a MIDI note is a black key (sharp/flat)
@@ -53,33 +56,52 @@ export function PianoKeyboard({
 
   // Custom render function for keys
   const renderNoteLabel = ({ midiNumber }: { midiNumber: number }) => {
-    const isExpected = expectedMidiNumbers.includes(midiNumber)
+    const isExpectedChord = expectedMidiNumbers.includes(midiNumber)
+    const isExpectedRoot = expectedRootNotes.includes(midiNumber)
     const isPlayed = playedNotes.includes(midiNumber)
 
-    if (!isExpected && !isPlayed) return null
+    if (!isExpectedChord && !isExpectedRoot && !isPlayed) return null
 
     // Determine state and color
     let indicator = ''
     let colorClass = ''
+    let shape = 'circle'  // or 'square' for root notes
 
-    if (isPlayed && isExpected) {
-      indicator = '✓'
-      colorClass = 'correct'
-    } else if (isPlayed && !isExpected) {
+    // Root note (left hand) - display as square
+    if (isExpectedRoot) {
+      shape = 'square'
+      if (isPlayed) {
+        indicator = '✓'
+        colorClass = 'correct-root'
+      } else {
+        indicator = '■'
+        colorClass = 'expected-root'
+      }
+    }
+    // Chord note (right hand) - display as circle
+    else if (isExpectedChord) {
+      shape = 'circle'
+      if (isPlayed) {
+        indicator = '✓'
+        colorClass = 'correct'
+      } else {
+        indicator = '○'
+        colorClass = 'expected'
+      }
+    }
+    // Incorrect note
+    else if (isPlayed) {
       indicator = '✗'
       colorClass = 'incorrect'
-    } else if (!isPlayed && isExpected) {
-      indicator = '○'
-      colorClass = 'expected'
     }
 
     // Determine key type for positioning
     const keyType = isBlackKey(midiNumber) ? 'black-key' : 'white-key'
 
-    console.log(`🎹 Indicator for MIDI ${midiNumber}: ${indicator} ${colorClass} ${keyType}`)
+    console.log(`🎹 Indicator for MIDI ${midiNumber}: ${indicator} ${colorClass} ${keyType} ${shape}`)
 
     return (
-      <div className={`note-indicator ${colorClass} ${keyType}`}>
+      <div className={`note-indicator ${colorClass} ${keyType} ${shape}`}>
         {indicator}
       </div>
     )
@@ -104,15 +126,19 @@ export function PianoKeyboard({
       <div className="piano-legend">
         <div className="legend-item">
           <span className="legend-icon expected">○</span>
-          <span>Expected - Not Played Yet</span>
+          <span>Chord Note - Expected</span>
+        </div>
+        <div className="legend-item">
+          <span className="legend-icon expected-root">■</span>
+          <span>Root Note - Expected (Left Hand)</span>
         </div>
         <div className="legend-item">
           <span className="legend-icon correct">✓</span>
-          <span>Correct - Playing Right Note</span>
+          <span>Correct Note</span>
         </div>
         <div className="legend-item">
           <span className="legend-icon incorrect">✗</span>
-          <span>Incorrect - Wrong Note</span>
+          <span>Incorrect Note</span>
         </div>
       </div>
     </div>

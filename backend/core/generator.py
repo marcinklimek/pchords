@@ -10,7 +10,7 @@ from pychord import Chord
 
 from .models import ChordData, ChordSet
 from ..utils.constants import SCALES_LIST
-from ..utils.converters import save_json, load_json
+from ..utils.converters import save_json, load_json, note_name_to_midi
 
 
 class ChordGenerator:
@@ -88,7 +88,8 @@ class ChordGenerator:
                     root="C",
                     name="C Major",
                     notes=["C", "E", "G"],
-                    scale="maj"
+                    scale="maj",
+                    root_note=note_name_to_midi("C", octave=2)
                 )
 
     async def get_remaining_count(self) -> int:
@@ -150,7 +151,8 @@ class ChordGenerator:
                                 notes=notes_subset,
                                 scale=scale,
                                 quality=quality,
-                                inversion="from_3rd"
+                                inversion="from_3rd",
+                                root_note=note_name_to_midi(root_note, octave=2)
                             )
                         )
 
@@ -165,7 +167,8 @@ class ChordGenerator:
                                 notes=notes_subset,
                                 scale=scale,
                                 quality=quality,
-                                inversion="from_7th"
+                                inversion="from_7th",
+                                root_note=note_name_to_midi(root_note, octave=2)
                             )
                         )
 
@@ -179,7 +182,8 @@ class ChordGenerator:
                                 notes=notes,
                                 scale=scale,
                                 quality=quality,
-                                inversion="root"
+                                inversion="root",
+                                root_note=note_name_to_midi(root_note, octave=2)
                             )
                         )
 
@@ -198,7 +202,8 @@ class ChordGenerator:
                     "notes": chord.notes,
                     "scale": chord.scale,
                     "quality": chord.quality,
-                    "inversion": chord.inversion
+                    "inversion": chord.inversion,
+                    "root_note": chord.root_note
                 }
                 for chord in self.chord_list
             ]

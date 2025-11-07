@@ -16,13 +16,17 @@ import { apiClient } from './services/api'
 // Create a client
 const queryClient = new QueryClient()
 
+type RootNoteMode = 'off' | 'single' | 'octave'
+
 function PracticeScreen() {
   const { isConnected, devices, playedNotes, initialize } = useMidi()
   const { data: chordResponse, isLoading, refetch } = useNextChord()
 
   const [expectedNoteIndices, setExpectedNoteIndices] = useState<number[]>([])
+  const [rootNoteMode, setRootNoteMode] = useState<RootNoteMode>('single')
+  const [expectedMidiNumbers, setExpectedMidiNumbers] = useState<number[]>([])
 
-  // Convert note names to MIDI note indices (0-11)
+  // Convert note names to MIDI note indices (0-11) and calculate expected MIDI numbers
   useEffect(() => {
     if (chordResponse?.chord) {
       const noteNames = chordResponse.chord.notes
@@ -50,10 +54,24 @@ function PracticeScreen() {
         return notes[name] ?? 0
       })
       setExpectedNoteIndices(indices)
+
+      // Add root note MIDI numbers if root note mode is enabled
+      const midiNumbers: number[] = []
+      if (rootNoteMode !== 'off' && chordResponse.chord.root_note !== undefined) {
+        midiNumbers.push(chordResponse.chord.root_note)
+
+        // If octave mode, add root note + 12 (one octave higher)
+        if (rootNoteMode === 'octave') {
+          midiNumbers.push(chordResponse.chord.root_note + 12)
+        }
+      }
+      setExpectedMidiNumbers(midiNumbers)
+
       console.log('🎵 New chord:', chordResponse.chord.name)
       console.log('📝 Expected notes:', noteNames, '→ indices:', indices)
+      console.log('🎸 Root note MIDI:', midiNumbers, 'mode:', rootNoteMode)
     }
-  }, [chordResponse])
+  }, [chordResponse, rootNoteMode])
 
   // Check if chord is completed
   useEffect(() => {
@@ -67,12 +85,22 @@ function PracticeScreen() {
     const sortedPlayed = [...playedIndices].sort((a, b) => a - b)
     const sortedExpected = [...expectedNoteIndices].sort((a, b) => a - b)
 
-    // Check if arrays are equal
-    const isCorrect =
+    // Check if chord notes are correct
+    const chordNotesCorrect =
       sortedPlayed.length === sortedExpected.length &&
       sortedPlayed.every((note, index) => note === sortedExpected[index])
 
-    console.log('🎹 Played:', sortedPlayed, 'Expected:', sortedExpected, 'Correct:', isCorrect)
+    // Check if root notes are correct (if enabled)
+    let rootNotesCorrect = true
+    if (rootNoteMode !== 'off' && expectedMidiNumbers.length > 0) {
+      rootNotesCorrect = expectedMidiNumbers.every((midi) => playedNotes.includes(midi))
+    }
+
+    const isCorrect = chordNotesCorrect && rootNotesCorrect
+
+    console.log('🎹 Played indices:', sortedPlayed, 'Expected indices:', sortedExpected)
+    console.log('🎸 Root notes correct:', rootNotesCorrect, 'Expected MIDI:', expectedMidiNumbers)
+    console.log('✅ Overall correct:', isCorrect)
 
     if (isCorrect) {
       console.log('✅ Chord correct! Auto-advancing in 1 second...')
@@ -81,7 +109,7 @@ function PracticeScreen() {
         refetch()
       }, 1000)
     }
-  }, [playedNotes, expectedNoteIndices, refetch])
+  }, [playedNotes, expectedNoteIndices, expectedMidiNumbers, rootNoteMode, refetch])
 
   const handleNextChord = () => {
     refetch()
@@ -130,7 +158,28 @@ function PracticeScreen() {
           <PianoKeyboard
             playedNotes={playedNotes}
             expectedNotes={expectedNoteIndices}
+            expectedRootNotes={expectedMidiNumbers}
           />
+        </div>
+
+        {/* Root Note Configuration */}
+        <div className="mb-6 bg-gray-800 rounded-xl shadow-2xl p-6">
+          <h3 className="text-xl font-semibold text-white mb-4">Root Note Settings</h3>
+          <div className="flex gap-4 items-center">
+            <label className="text-gray-300">Root Note Mode:</label>
+            <select
+              value={rootNoteMode}
+              onChange={(e) => setRootNoteMode(e.target.value as RootNoteMode)}
+              className="px-4 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:outline-none focus:border-primary-500"
+            >
+              <option value="off">Off - Rootless chords only</option>
+              <option value="single">Single - One root note (left hand)</option>
+              <option value="octave">Octave - Two root notes (left hand)</option>
+            </select>
+          </div>
+          <p className="text-gray-400 text-sm mt-2">
+            Practice left hand bass notes along with right hand chords
+          </p>
         </div>
 
         {/* Control Buttons */}

@@ -1,12 +1,49 @@
+# IDE
 src/.idea/*
-src/__pycache__/*
+/.idea/*
+.vscode/
+
+# macOS
+.DS_Store
 ./DS_Store
+
+# Python
+src/__pycache__/*
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+backend/__pycache__/
+backend/**/__pycache__/
+
+# Build artifacts
 /src/build/
 /src/dist/
-/src/chords.json
 /src/main.spec
-/.idea/*
-.DS_Store
 
+# Data files
+/src/chords.json
+data/
+*.db
+*.sqlite
 
+# Node.js / Frontend
+node_modules/
+frontend/node_modules/
+frontend/dist/
+frontend/build/
+package-lock.json
+frontend/package-lock.json
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Notes
 notes.md

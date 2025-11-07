@@ -81,8 +81,15 @@ function PracticeScreen() {
     // Convert MIDI notes to indices (0-11) and remove duplicates
     const playedIndices = Array.from(new Set(playedNotes.map((note) => note % 12)))
 
+    // Remove root note indices from played indices for chord validation
+    // (root notes are validated separately by exact MIDI number)
+    const rootNoteIndices = expectedMidiNumbers.map((midi) => midi % 12)
+    const playedChordIndices = playedIndices.filter(
+      (idx) => !rootNoteIndices.includes(idx)
+    )
+
     // Sort both arrays for comparison
-    const sortedPlayed = [...playedIndices].sort((a, b) => a - b)
+    const sortedPlayed = [...playedChordIndices].sort((a, b) => a - b)
     const sortedExpected = [...expectedNoteIndices].sort((a, b) => a - b)
 
     // Check if chord notes are correct
@@ -98,9 +105,9 @@ function PracticeScreen() {
 
     const isCorrect = chordNotesCorrect && rootNotesCorrect
 
-    console.log('🎹 Played indices:', sortedPlayed, 'Expected indices:', sortedExpected)
+    console.log('🎹 Played chord indices:', sortedPlayed, 'Expected:', sortedExpected)
     console.log('🎸 Root notes correct:', rootNotesCorrect, 'Expected MIDI:', expectedMidiNumbers)
-    console.log('✅ Overall correct:', isCorrect)
+    console.log('✅ Chord notes correct:', chordNotesCorrect, 'Overall correct:', isCorrect)
 
     if (isCorrect) {
       console.log('✅ Chord correct! Auto-advancing in 1 second...')

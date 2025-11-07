@@ -61,6 +61,7 @@ class ChordData(BaseModel):
     scale: str = Field(default="", description="Scale type (maj/min)")
     quality: Optional[str] = Field(default=None, description="Chord quality")
     inversion: Optional[str] = Field(default=None, description="Chord inversion type")
+    root_note: Optional[int] = Field(default=None, description="MIDI note number for root note (e.g., C2 = 36)")
 
 
 class ChordSet(BaseModel):

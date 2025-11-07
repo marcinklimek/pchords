@@ -70,11 +70,19 @@
 
 /* Color classes for indicators */
 .note-indicator.expected {
-  color: #3b82f6;  /* Blue for expected */
+  color: #3b82f6;  /* Blue for expected chord notes */
+}
+
+.note-indicator.expected-root {
+  color: #f59e0b;  /* Orange/Gold for expected root notes (left hand) */
 }
 
 .note-indicator.correct {
   color: #10b981;  /* Green for correct */
+}
+
+.note-indicator.correct-root {
+  color: #10b981;  /* Green for correct root notes */
 }
 
 .note-indicator.incorrect {
@@ -108,6 +116,10 @@
 
 .legend-icon.expected {
   color: #3b82f6;  /* Blue */
+}
+
+.legend-icon.expected-root {
+  color: #f59e0b;  /* Orange/Gold */
 }
 
 .legend-icon.correct {

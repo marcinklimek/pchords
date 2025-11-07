@@ -9,6 +9,7 @@ export interface ChordData {
   scale: string
   quality?: string
   inversion?: string
+  root_note?: number  // MIDI note number for root note (e.g., C2 = 36)
 }
 
 export interface ChordSet {

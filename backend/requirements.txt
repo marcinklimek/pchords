@@ -4,15 +4,6 @@ uvicorn[standard]==0.24.0
 python-multipart==0.0.6
 websockets==12.0
 
-# Music Libraries (from original project)
-pychord>=1.0.0
-mido>=1.2.10
-python-rtmidi
-
-# Database
-sqlalchemy==2.0.23
-aiosqlite==0.19.0
-
 # Validation and Data
 pydantic==2.5.0
 pydantic-settings==2.1.0

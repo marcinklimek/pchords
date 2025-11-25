@@ -2,7 +2,12 @@
  * API client for PChords backend.
  */
 
-import type { ChordResponse, ChordSet } from '../types'
+import type {
+  ChordResponse,
+  ChordSet,
+  ScaleResponse,
+  ProgressionData
+} from '../types'
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
 
@@ -67,6 +72,26 @@ class ApiClient {
   async regenerateChords(): Promise<{ message: string; count: number }> {
     return this.request<{ message: string; count: number }>('/api/chords/regenerate', {
       method: 'POST',
+    })
+  }
+
+  // Scale endpoints
+  async getScaleTypes(): Promise<string[]> {
+    return this.request<string[]>('/api/scales/types')
+  }
+
+  async getScale(root: string, type: string): Promise<ScaleResponse> {
+    return this.request<ScaleResponse>(`/api/scales/${encodeURIComponent(root)}/${encodeURIComponent(type)}`)
+  }
+
+  // Progression endpoints
+  async getProgressionTemplates(): Promise<any[]> {
+    return this.request<any[]>('/api/progressions/templates')
+  }
+
+  async generateProgression(templateId: string, key: string, scaleType: string = 'Major'): Promise<ProgressionData> {
+    return this.request<ProgressionData>(`/api/progressions/generate?template_id=${templateId}&key=${encodeURIComponent(key)}&scale_type=${scaleType}`, {
+      method: 'POST'
     })
   }
 }

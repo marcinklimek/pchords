@@ -1,136 +1,106 @@
 """
 Data models for PChords backend.
 """
-
 from typing import List, Optional, Dict, Any
 from datetime import datetime
 from pydantic import BaseModel, Field
 from enum import Enum
 
-
-class ChordQuality(str, Enum):
-    """Available chord qualities."""
-    M9 = "M9"
-    m9 = "m9"
-    NINE = "9"
-    SEVEN_SHARP9_SHARP5 = "7#9#5"
-    SEVEN_FLAT9_FLAT5 = "7b9b5"
-    M7 = "M7"
-    SEVEN = "7"
-    m7 = "m7"
-    m7b5 = "m7b5"
-    dim7 = "dim7"
-    MAJOR = ""
-    MINOR = "m"
-    DIM = "dim"
-    AUG = "aug"
-
-
-class ChordScale(str, Enum):
-    """Available chord scales."""
-    MAJOR = "maj"
-    MINOR = "min"
-
-
-class Difficulty(str, Enum):
-    """Practice difficulty levels."""
-    EASY = "easy"
-    MEDIUM = "medium"
-    HARD = "hard"
-    EXPERT = "expert"
-
-
-class ChordInversion(str, Enum):
-    """Chord inversion types."""
-    ROOT = "root"
-    FIRST = "first"
-    SECOND = "second"
-    FROM_3RD = "from_3rd"
-    FROM_7TH = "from_7th"
-
+# Import from theory engine
+from .theory.notes import NoteName
+from .theory.chords import ChordQuality
+from .theory.scales import ScaleType
+from .theory.voicings import VoicingType
 
 # ============================================================================
 # Core Models
 # ============================================================================
 
 class ChordData(BaseModel):
-    """Represents a single chord."""
-    root: str = Field(..., description="Root note (e.g., C, D#, Eb)")
-    name: str = Field(..., description="Full chord name")
-    notes: List[str] = Field(..., description="List of note names in the chord")
-    scale: str = Field(default="", description="Scale type (maj/min)")
-    quality: Optional[str] = Field(default=None, description="Chord quality")
-    inversion: Optional[str] = Field(default=None, description="Chord inversion type")
-    root_note: Optional[int] = Field(default=None, description="MIDI note number for root note (e.g., C2 = 36)")
+    """Represents a single chord for API response."""
+    root: str = Field(..., description="Root note name")
+    quality: str = Field(..., description="Chord quality")
+    name: str = Field(..., description="Full display name")
+    notes: List[str] = Field(..., description="List of note names")
+    midi_notes: List[int] = Field(..., description="List of MIDI note numbers")
+    voicing_type: Optional[str] = Field(None, description="Voicing type used")
+    scale_context: Optional[str] = Field(None, description="Scale context if applicable")
 
+class ScaleData(BaseModel):
+    """Represents a scale."""
+    root: str
+    type: str
+    name: str
+    notes: List[str]
+    midi_notes: List[int]
+    diatonic_chords: Optional[List[ChordData]] = None
+
+class ProgressionStep(BaseModel):
+    """A single step in a chord progression."""
+    degree: str = Field(..., description="Roman numeral degree (e.g., II, V)")
+    chord: ChordData
+    duration_beats: int = Field(4, description="Duration in beats")
+
+class ProgressionData(BaseModel):
+    """A full chord progression."""
+    id: str
+    name: str
+    key: str
+    scale_type: str
+    steps: List[ProgressionStep]
+    tempo: int = 120
+
+# ============================================================================
+# Configuration Models
+# ============================================================================
 
 class ChordSet(BaseModel):
     """Configuration for a set of chords to practice."""
-    id: str = Field(..., description="Unique identifier")
-    name: str = Field(..., description="Display name")
-    enabled: bool = Field(default=True, description="Whether this set is active")
-    qualities: List[str] = Field(default_factory=list, description="Chord qualities to include")
-    scales: List[str] = Field(default_factory=list, description="Scales to use")
-    inversions: List[str] = Field(default_factory=list, description="Inversion types")
-    notes_range: Optional[List[int]] = Field(default=None, description="MIDI note range [min, max]")
-    exclude_roots: List[str] = Field(default_factory=list, description="Root notes to exclude")
-    difficulty: str = Field(default="medium", description="Difficulty level")
-    specific_chords: List[ChordData] = Field(default_factory=list, description="Manually defined chords")
+    id: str
+    name: str
+    enabled: bool = True
+    qualities: List[ChordQuality] = []
+    roots: List[str] = [] # Specific roots to practice
+    voicing_types: List[VoicingType] = [VoicingType.CLOSE]
+    difficulty: str = "medium"
 
-
-class Config(BaseModel):
-    """Application configuration."""
-    # Window/UI settings
-    window_width: int = 998
-    window_height: int = 800
-    window_title: str = "PChords"
-
-    # MIDI settings
-    midi_poll_interval: float = 0.1
-    midi_timeout: float = 5.0
-
-    # Chord generation
-    chord_sets: List[ChordSet] = Field(default_factory=list)
+class UserProfile(BaseModel):
+    """User settings and profile."""
+    id: str = "default"
+    midi_input_device: Optional[str] = None
+    root_note_mode: str = "single" # off, single, octave
     active_chord_set_id: Optional[str] = None
-
-    # Database
-    database_url: str = "sqlite+aiosqlite:///./pchords.db"
-
-
+    
 # ============================================================================
 # API Request/Response Models
 # ============================================================================
 
 class ChordResponse(BaseModel):
-    """Response model for chord data."""
+    """Response model for chord generation."""
     chord: ChordData
-    remaining: int = Field(..., description="Number of chords remaining in current set")
+    remaining: int
 
+class ScaleResponse(BaseModel):
+    """Response model for scale data."""
+    scale: ScaleData
+    diatonic_chords: List[ChordData]
 
 class ChordSetCreateRequest(BaseModel):
     """Request to create a new chord set."""
     name: str
-    qualities: List[str] = []
-    scales: List[str] = ["maj", "min"]
-    inversions: List[str] = ["from_3rd", "from_7th"]
+    qualities: List[ChordQuality] = []
+    roots: List[str] = []
+    voicing_types: List[VoicingType] = [VoicingType.CLOSE]
     difficulty: str = "medium"
-
 
 class ChordSetUpdateRequest(BaseModel):
     """Request to update an existing chord set."""
     name: Optional[str] = None
     enabled: Optional[bool] = None
-    qualities: Optional[List[str]] = None
-    scales: Optional[List[str]] = None
-    inversions: Optional[List[str]] = None
+    qualities: Optional[List[ChordQuality]] = None
+    roots: Optional[List[str]] = None
+    voicing_types: Optional[List[VoicingType]] = None
     difficulty: Optional[str] = None
-
-
-class ConfigUpdateRequest(BaseModel):
-    """Request to update configuration."""
-    active_chord_set_id: Optional[str] = None
-    midi_poll_interval: Optional[float] = None
-
 
 # ============================================================================
 # MIDI Models
@@ -143,7 +113,6 @@ class MidiMessage(BaseModel):
     velocity: int = Field(default=0, ge=0, le=127, description="Note velocity")
     timestamp: float = Field(default_factory=lambda: datetime.now().timestamp())
 
-
 class MidiStatus(BaseModel):
     """Status of MIDI connections."""
     connected: bool
@@ -155,58 +124,15 @@ class MidiStatus(BaseModel):
 # Statistics Models
 # ============================================================================
 
-class ChordAttempt(BaseModel):
-    """Record of a single chord attempt."""
-    chord_name: str
-    expected_notes: List[str]
-    played_notes: List[int]
-    success: bool
-    time_taken_ms: int
-    attempted_at: datetime = Field(default_factory=datetime.now)
-
-
 class PracticeSession(BaseModel):
-    """A practice session."""
+    """A practice session record."""
     id: Optional[int] = None
     started_at: datetime = Field(default_factory=datetime.now)
-    ended_at: Optional[datetime] = None
-    chord_set_id: Optional[str] = None
-    total_chords: int = 0
-    successful_chords: int = 0
+    total_items: int = 0
+    correct_items: int = 0
+    mode: str # chords, scales, progression
 
-    @property
-    def success_rate(self) -> float:
-        """Calculate success rate."""
-        if self.total_chords == 0:
-            return 0.0
-        return (self.successful_chords / self.total_chords) * 100
-
-
-class ChordStats(BaseModel):
-    """Statistics for a specific chord."""
-    chord_name: str
-    attempts: int = 0
-    successes: int = 0
-    failures: int = 0
-    average_time_ms: float = 0.0
-    best_time_ms: Optional[int] = None
-    last_practiced: Optional[datetime] = None
-
-    @property
-    def success_rate(self) -> float:
-        """Calculate success rate."""
-        if self.attempts == 0:
-            return 0.0
-        return (self.successes / self.attempts) * 100
-
-
-class OverallStats(BaseModel):
-    """Overall practice statistics."""
-    total_sessions: int = 0
-    total_chords_practiced: int = 0
-    total_successes: int = 0
-    overall_success_rate: float = 0.0
-    average_time_ms: float = 0.0
-    most_practiced_chord: Optional[str] = None
-    best_chord: Optional[str] = None
-    needs_practice: List[str] = []
+class Config(BaseModel):
+    """Global app config."""
+    chord_sets: List[ChordSet] = []
+    user_profile: UserProfile = Field(default_factory=UserProfile)

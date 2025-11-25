@@ -1,47 +1,44 @@
 """
 FastAPI backend for PChords.
 """
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
 from contextlib import asynccontextmanager
 
-from .api import chords, midi
-from .core.models import ChordSet
-
+from .api import chords, midi, scales, progressions
+from .core.models import ChordSet, ChordQuality, VoicingType
+from .core.theory.notes import NoteName
 
 # Default chord sets
 DEFAULT_CHORD_SETS = [
     ChordSet(
-        id="beginners",
-        name="Beginners - Basic Chords",
+        id="beginners_major",
+        name="Beginners - Major Triads",
         enabled=True,
-        qualities=["", "m"],
-        scales=["maj"],
-        inversions=["root"],
+        qualities=[ChordQuality.MAJOR],
+        roots=[NoteName.C, NoteName.F, NoteName.G],
+        voicing_types=[VoicingType.CLOSE],
         difficulty="easy"
     ),
     ChordSet(
-        id="jazz_ninth",
-        name="Jazz - 9th Chords",
+        id="jazz_ii_v_i",
+        name="Jazz - II-V-I Shells",
         enabled=True,
-        qualities=["M9", "m9"],
-        scales=["maj", "min"],
-        inversions=["from_3rd", "from_7th"],
+        qualities=[ChordQuality.MINOR_7, ChordQuality.DOMINANT_7, ChordQuality.MAJOR_7],
+        roots=[NoteName.D, NoteName.G, NoteName.C],
+        voicing_types=[VoicingType.SHELL_3_7, VoicingType.SHELL_7_3],
         difficulty="medium"
     ),
     ChordSet(
-        id="jazz_altered",
-        name="Jazz - Altered Chords",
+        id="rootless_voicings",
+        name="Rootless Voicings (Bill Evans)",
         enabled=False,
-        qualities=["7#9#5", "7b9b5"],
-        scales=["maj", "min"],
-        inversions=["from_3rd", "from_7th"],
+        qualities=[ChordQuality.MINOR_9, ChordQuality.DOMINANT_13, ChordQuality.MAJOR_9],
+        roots=[NoteName.C, NoteName.F, NoteName.B_FLAT, NoteName.E_FLAT],
+        voicing_types=[VoicingType.ROOTLESS_A, VoicingType.ROOTLESS_B],
         difficulty="hard"
     )
 ]
-
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -56,7 +53,6 @@ async def lifespan(app: FastAPI):
     # Shutdown
     print("🛑 PChords backend shutting down")
 
-
 # Create FastAPI app
 app = FastAPI(
     title="PChords API",
@@ -70,7 +66,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:5173",  # Vite dev server
-        "http://localhost:3000",  # Alternative frontend port
+        "http://localhost:3000",
         "http://127.0.0.1:5173",
         "http://127.0.0.1:3000",
     ],
@@ -82,7 +78,8 @@ app.add_middleware(
 # Include routers
 app.include_router(chords.router)
 app.include_router(midi.router)
-
+app.include_router(scales.router)
+app.include_router(progressions.router)
 
 @app.get("/")
 async def root():
@@ -99,12 +96,10 @@ async def root():
         }
     }
 
-
 @app.get("/health")
 async def health_check():
     """Health check endpoint."""
     return {"status": "healthy"}
-
 
 if __name__ == "__main__":
     import uvicorn

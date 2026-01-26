@@ -1,0 +1,40 @@
+# Konfiguracja serwera Backdoor
+# ================================
+
+server:
+  # Adres nasłuchiwania (0.0.0.0 = wszystkie interfejsy)
+  host: "0.0.0.0"
+  # Port API REST
+  port: 8080
+
+database:
+  # Ścieżka do pliku bazy SQLite
+  path: "./data/backdoor.db"
+
+logging:
+  # Poziom logowania: DEBUG, INFO, WARN, ERROR
+  level: "INFO"
+  # Ile dni przechowywać logi systemowe
+  retention_days: 60
+
+admin:
+  # Czy wymagać logowania do panelu (na przyszłość)
+  require_auth: false
+  # Tytuł okna
+  window_title: "Backdoor - Panel Administracyjny"
+
+reader:
+  # Czy serwer ma też obsługiwać czytnik USB
+  enabled: true
+  # Minimalny czas między odczytami tej samej karty (ms)
+  debounce_ms: 3000
+
+backup:
+  # Automatyczne backupy
+  enabled: true
+  # Gdzie zapisywać backupy
+  path: "./backups"
+  # O której godzinie (format 24h)
+  time: "03:00"
+  # Ile backupów przechowywać
+  keep_count: 7
